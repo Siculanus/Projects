@@ -1,0 +1,55 @@
+---
+title: "Data Visualization"
+author: "Me Myself"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo = FALSE}
+library(ggplot2)
+mpg
+
+```
+
+```{r question-1-response}
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point() +
+  geom_smooth(color = 'blue', se = FALSE) +
+  labs (x = 'displ', y = 'hwy')
+
+```
+
+```{r question-2-response}
+
+ggplot(mpg, aes(x = displ, y = hwy, colour = drv)) +
+  geom_point() +
+  geom_smooth(color = 'blue', se = FALSE) +
+  labs (x = 'displ', y = 'hwy')
+
+```
+
+```{r question-3-response}
+
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
+    geom_point(data = mpg, mapping  = aes(x = displ, y = hwy, color = drv))+
+    geom_smooth(data = mpg, mapping = aes(linetype = drv), se = FALSE)
+
+```
+
+```{r question-4-response}
+
+ggplot(mpg, aes(x = cty, y = hwy, colour = class)) +
+  geom_jitter(size = 2)
+
+```
+
+```{r question-5-response}
+
+ggplot(data = mpg)+
+      geom_point(aes(x = hwy, y = cyl), color= 'orange' , shape = 17) +
+      facet_wrap(~class, nrow = 2)
+
+```
