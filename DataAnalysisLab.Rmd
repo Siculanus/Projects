@@ -1,0 +1,104 @@
+---
+title: "Data Analysis Lab"
+author: "Me Myself"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##### Assignment Instructions
+
+Complete all questions below. After completing the assignment, knit your document, and download both your .Rmd and knitted output. Upload your files for peer review.
+
+For each response, include comments detailing your response and what each line does.
+
+------------------------------------------------------------------------
+
+##### Question 1.
+
+Using the nycflights13 dataset, find all flights that departed in July, August, or September using the helper function between().
+
+```{r question-1-response}
+# Opening the libraries that might be used in this assignment.
+library(tidyverse)
+library(dplyr)
+library(nycflights13)
+#Creating a filter on the data to extract only flights between month 7 and 9.
+flights %>% filter(between(month, 7, 9))
+
+```
+
+#### Question 2.
+
+Using the nycflights13 dataset sort flights to find the 10 flights that flew the furthest. Put them in order of fastest to slowest.
+
+```{r question-2-response}
+# Using the arrange function to sort flights. 
+# Sorting them by the distance column in descending order for greater distances at first, 
+# then mph in ascending order, for fastest first.
+# The mutate function calculates a new column with the flight speeds to find the fastest.
+flights %>% mutate(mph = distance / air_time * 60) %>%
+            arrange(-distance,mph) %>%
+            head(10)
+
+
+```
+
+#### Question 3.
+
+Using the nycflights13 dataset, calculate a new variable called "hr_delay" and arrange the flights dataset in order of the arrival delays in hours (longest delays at the top). Put the new variable you created just before the departure time.Hint: use the experimental argument .before.
+
+```{r question-3-response}
+# Function mutate() creates a new variable; function arrange() sorts it in descending order;
+# finally the relocate() function is used with the experimental argument .before to reorganise the columns.
+flights %>% mutate(hr_delay = dep_delay/60) %>%
+            arrange(-hr_delay) %>%
+            relocate(hr_delay, .before = dep_time)
+
+```
+
+##### Question 4.
+
+Using the nycflights13 dataset, find the most popular destinations (those with more than 2000 flights) and show the destination, the date info, the carrier. Then show just the number of flights for each popular destination.
+
+```{r question-4-response}
+# First two variables are created, one that counts destinations and filters for the ones only over 2000.
+# The second provides the other required information. 
+count <- flights %>% 
+                      count(dest) %>%
+                      filter(n>2000)
+selects <- flights %>% 
+                      distinct(dest,year,month,day,carrier)
+# The two variables are joined in one table to provide all the required info.
+df<-left_join(count,selects)
+df
+
+```
+
+#### Question 5.
+
+Using the nycflights13 dataset, find the flight information (flight number, origin, destination, carrier, number of flights in the year, and percent late) for the flight numbers with the highest percentage of arrival delays. Only include the flight numbers that have over 100 flights in the year.
+
+```{r question-5-response}
+
+#Creating two variables: first with delayed flights; second with a filter for greater than 100 flights.
+
+df1<-flights %>% group_by(flight,year) %>% filter(arr_delay>0) %>% summarise(delayed_flights=n())
+
+df2<-flights %>% group_by(flight,year) %>%summarise (no_flights_in_year=n()) %>%filter(no_flights_in_year>100)
+
+# Using a join to combine the two first variables from the data
+df<-inner_join(df1,df2)
+
+# Two new variables where the percent late is created and distinct values are selected to be combined in a second join.
+df3<- df %>% transmute(percent_late=(delayed_flights/no_flights_in_year)*100,flight,year,no_flights_in_year)
+
+
+df4<-flights %>% distinct(flight,year,origin,dest,carrier)
+
+
+left_join(df3,df4)
+
+```
